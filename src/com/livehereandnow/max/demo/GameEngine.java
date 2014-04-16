@@ -223,7 +223,10 @@ public class GameEngine {
     }
 
     public boolean doCmd(String cmd) throws IOException {
-        String cleanCmd = cmd.toLowerCase().trim();
+//        String cleanCmd = cmd.toLowerCase().trim();// 全部轉小寫
+
+        String cleanCmd = cmd.trim();//           取消全部轉小寫
+
         String[] strTokens = cmd.split(" ");
         List<String> tokens = new ArrayList<>();
 //        System.out.println("sys >>>");
@@ -243,6 +246,7 @@ public class GameEngine {
                 System.out.println("   change-turn  change player's turn");
                 System.out.println("   status       to show current game status");
                 System.out.println("   version      顯示版本變更歷史");
+                System.out.println("  TODO         代辦事項");
                 System.out.println("=== basic commands === (end)");
 
                 return true;
@@ -258,13 +262,23 @@ public class GameEngine {
                 showStatus();
                 return true;
             }
+            case "TODO": {
+                System.out.println();
+                System.out.println("  === TODO ===  ");
+                System.out.println("    1. 目前第二個玩家有可能用兩個內政點數拿兩張時代A的領袖牌,應予以制止");
+                return true;
+            }
             case "version": {
                 System.out.println();
+                System.out.println("  === ver 0.5.1 ===  2014-4-16, 11:49");
+                System.out.println("    1. 取消輸入英文變成小寫");
+                System.out.println("    2. 新增TODO指令,記錄應該要處理的待辦事項");
+
                 System.out.println("  === ver 0.5 ===  2014-4-16, 11:27");
                 System.out.println("    1. 玩家再也無法拿空牌");
                 System.out.println("    2. 玩家可以有效的拿取卡牌列上的牌,並有效的支付點數");
                 System.out.println();
-                
+
                 System.out.println("  === ver 0.4 ===  2014-4-16, 11:00");
                 System.out.println("    1. do拿牌扣點 可以有效的扣除該玩家拿牌後的內政點數");
                 System.out.println("    2. 玩家內政點數沒有時無法拿取卡牌列0~4");
@@ -298,7 +312,7 @@ public class GameEngine {
                 System.out.println("  === 版本控制說明 ===");
                 System.out.println("    1. ver X.Y.Z");
                 System.out.println("    2. X最大版本,基本功能尚未完備前為0");
-                System.out.println("    3. Y中版本,任何新增移除功能.只要Y的值增加,Z值歸0");
+                System.out.println("    3. Y中版本,任何和業務邏輯相關的新增移除功能,Y版本+1,只要Y的值增加,Z值歸0");
                 System.out.println("    4. Z最小版本,任何使用者介面的調整或增刪說明,與功能無關");
                 return true;
             }
@@ -318,14 +332,14 @@ public class GameEngine {
                             return false;
                         }
 //2014-4-16 11:20,max,目前的cardNum必然是<=12,所以還有排除負數的情況                       
-                        if(cardNum < 0) {
+                        if (cardNum < 0) {
                             return false;
                         }
                         //2014-4-16 11:20,max,目前的cardNum必然介於0~12之間但是有可能是空牌                      
-                        if(cardRow.get(cardNum).get編號()==999) {
+                        if (cardRow.get(cardNum).get編號() == 999) {
                             System.out.println("不讓玩家拿空牌");
                             return false;
-                            
+
                         }
 //2014-4-16 10:20,max                        拿牌之前檢查內政點數夠不夠
 //                            確認當前玩家是誰,再確認當前玩家的內政點數,還要知道玩家想要拿的那張牌的價格
@@ -347,7 +361,7 @@ public class GameEngine {
                                 System.out.println("該玩家目前點數不足.不允許拿5~8牌");
                                 return false;
                             }
-                        }else if (cardNum <= 12) {
+                        } else if (cardNum <= 12) {
                             if (this.get當前玩家內政點數() >= 3) {
                                 System.out.println("該玩家具有點數準備允許該玩家拿牌(0~12)");
                                 do拿牌扣點(3);
