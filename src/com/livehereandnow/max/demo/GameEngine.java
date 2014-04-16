@@ -70,6 +70,15 @@ public class GameEngine {
         }
 
     }
+        public void set拿當前玩家拿過時代A領袖牌() {
+        if (當前玩家 == 1) {
+            p1.set拿過的時代A領袖牌數(1);
+        }
+        if (當前玩家 == 2) {
+            p2.set拿過的時代A領袖牌數(1);
+        }
+
+    }
 
     public int get當前玩家內政點數() {
         if (當前玩家 == 1) {
@@ -85,6 +94,26 @@ public class GameEngine {
 
         if (當前玩家 == 4) {
             return p4.get內政點數();
+        }
+
+        return -1;//不應該發生
+    }
+            
+            
+    public int get當前玩家拿過的時代A領袖牌數() {
+        if (當前玩家 == 1) {
+            return p1.get拿過的時代A領袖牌數();
+        }
+        if (當前玩家 == 2) {
+            return p2.get拿過的時代A領袖牌數();
+        }
+
+        if (當前玩家 == 3) {
+            return p3.get拿過的時代A領袖牌數();
+        }
+
+        if (當前玩家 == 4) {
+            return p4.get拿過的時代A領袖牌數();
         }
 
         return -1;//不應該發生
@@ -191,7 +220,7 @@ public class GameEngine {
         ageA內政牌.add(new Card(16, "工程天才", 0, CardType.黃牌, 850));
         ageA內政牌.add(new Card(17, "藝術作品", 0, CardType.黃牌, 1));
         ageA內政牌.add(new Card(18, "節儉", 0, CardType.黃牌, 150));
-        ageA內政牌.add(new Card(19, "荷馬", 0, CardType.黃牌, 600));
+        ageA內政牌.add(new Card(19, "荷馬", 0, CardType.領袖, 600));
         ageA內政牌.add(new Card(20, "建築工地", 0, CardType.黃牌, 630));
         ageA內政牌.add(new Card(21, "愛國主義", 0, CardType.黃牌, 529));
         ageA內政牌.add(new Card(22, "革新思想", 0, CardType.黃牌, 774));
@@ -270,6 +299,10 @@ public class GameEngine {
             }
             case "version": {
                 System.out.println();
+                System.out.println("  === ver 0.6 ===  2014-4-16, 12:42");
+                System.out.println("    1. 禁止讓玩家拿兩張A時代領袖");
+
+                
                 System.out.println("  === ver 0.5.1 ===  2014-4-16, 11:49");
                 System.out.println("    1. 取消輸入英文變成小寫");
                 System.out.println("    2. 新增TODO指令,記錄應該要處理的待辦事項");
@@ -339,8 +372,25 @@ public class GameEngine {
                         if (cardRow.get(cardNum).get編號() == 999) {
                             System.out.println("不讓玩家拿空牌");
                             return false;
-
                         }
+                        //2014-4-16 11:54,max,目前的cardNum必然介於0~12之間而且不會是空牌
+//                        當該玩家拿過一張時代A領袖牌時,就不能再拿取
+                        if (this.get當前玩家拿過的時代A領袖牌數()==1) {
+                            
+                            System.out.println("這個玩家已經拿過一張時代A領袖牌,如果他還想拿時代A的領袖牌予以制止");
+//                            return false;
+                        }
+
+                        if(cardRow.get(cardNum).get類型()==CardType.領袖){
+                                     System.out.println("這張是領袖牌");
+                                     
+                                     if(this.get當前玩家拿過的時代A領袖牌數()!=1){
+                                         set拿當前玩家拿過時代A領袖牌();
+                                     }else
+                                         return false;
+                                     
+                                     
+                                 }
 //2014-4-16 10:20,max                        拿牌之前檢查內政點數夠不夠
 //                            確認當前玩家是誰,再確認當前玩家的內政點數,還要知道玩家想要拿的那張牌的價格
 //                        當前玩家的變量是[當前玩家]
@@ -349,6 +399,16 @@ public class GameEngine {
                             if (this.get當前玩家內政點數() >= 1) {
                                 System.out.println("該玩家具有點數準備允許該玩家拿牌(0~4)");
                                 do拿牌扣點(1);
+                                System.out.println("該玩家拿的牌是不是領袖牌?");
+                                 System.out.println("player" + 當前玩家 + " 拿取 [" + cardRow.get(cardNum).get卡名() + "]");
+                                 System.out.println("player" + 當前玩家 + " 拿取 [" + cardRow.get(cardNum).get類型() + "]");
+//                                 if(cardRow.get(cardNum).get類型()==CardType.領袖){
+//                                     System.out.println("這張是領袖牌");
+//                                     
+//                                 }
+//                                 
+                                
+                                
                             } else {
                                 System.out.println("該玩家目前點數不足.不允許0~4拿牌");
                                 return false;
