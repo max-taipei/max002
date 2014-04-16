@@ -198,6 +198,10 @@ public class GameEngine {
             }
             case "version": {
                 System.out.println();
+                System.out.println("  === ver 0.3 ===  2014-4-16, 09:50");
+                System.out.println("    1. 拿牌限制在前13張,也就是take-card 0到12是有效值,不在這範圍的是無效指令");
+                System.out.println();
+
                 System.out.println("  === ver 0.2.2 ===  2014-4-16, 09:30");
                 System.out.println("    1. 增加中文說明");
                 System.out.println("    2. 增加version到help");
@@ -221,8 +225,8 @@ public class GameEngine {
 
                 System.out.println("  === 版本控制說明 ===");
                 System.out.println("    1. ver X.Y.Z");
-                System.out.println("    2. X最大版本");
-                System.out.println("    3. Y中版本,任何新增移除功能");
+                System.out.println("    2. X最大版本,基本功能尚未完備前為0");
+                System.out.println("    3. Y中版本,任何新增移除功能.只要Y的值增加,Z值歸0");
                 System.out.println("    4. Z最小版本,任何使用者介面的調整或增刪說明,與功能無關");
                 return true;
             }
@@ -238,6 +242,9 @@ public class GameEngine {
                     if (tokens.size() == 2) {
                         int cardNum = Integer.parseInt(tokens.get(1));
 
+                        if (cardNum > 12) {
+                            return false;
+                        }
 //                        System.out.println("player" + player + " is going to 拿取 card#" + cardNum);
                         switch (player) {
                             case 1:
