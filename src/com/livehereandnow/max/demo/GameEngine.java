@@ -60,15 +60,17 @@ public class GameEngine {
     public int getRoundNum() {
         return roundNum;
     }
-public void do拿牌扣點(int 點數){
-    if (當前玩家 == 1) {
-            p1.set內政點數(p1.get內政點數()-點數);
+
+    public void do拿牌扣點(int 點數) {
+        if (當前玩家 == 1) {
+            p1.set內政點數(p1.get內政點數() - 點數);
         }
         if (當前玩家 == 2) {
-            p2.set內政點數(p2.get內政點數()-點數);
+            p2.set內政點數(p2.get內政點數() - 點數);
         }
 
-}
+    }
+
     public int get當前玩家內政點數() {
         if (當前玩家 == 1) {
             return p1.get內政點數();
@@ -258,11 +260,16 @@ public void do拿牌扣點(int 點數){
             }
             case "version": {
                 System.out.println();
+                System.out.println("  === ver 0.5 ===  2014-4-16, 11:27");
+                System.out.println("    1. 玩家再也無法拿空牌");
+                System.out.println("    2. 玩家可以有效的拿取卡牌列上的牌,並有效的支付點數");
+                System.out.println();
+                
                 System.out.println("  === ver 0.4 ===  2014-4-16, 11:00");
                 System.out.println("    1. do拿牌扣點 可以有效的扣除該玩家拿牌後的內政點數");
                 System.out.println("    2. 玩家內政點數沒有時無法拿取卡牌列0~4");
                 System.out.println();
-                
+
                 System.out.println("  === ver 0.3 ===  2014-4-16, 09:50");
                 System.out.println("    1. 拿牌限制在前13張,也就是take-card 0到12是有效值,不在這範圍的是無效指令");
                 System.out.println();
@@ -310,20 +317,44 @@ public void do拿牌扣點(int 點數){
                         if (cardNum > 12) {
                             return false;
                         }
+//2014-4-16 11:20,max,目前的cardNum必然是<=12,所以還有排除負數的情況                       
+                        if(cardNum < 0) {
+                            return false;
+                        }
+                        //2014-4-16 11:20,max,目前的cardNum必然介於0~12之間但是有可能是空牌                      
+                        if(cardRow.get(cardNum).get編號()==999) {
+                            System.out.println("不讓玩家拿空牌");
+                            return false;
+                            
+                        }
 //2014-4-16 10:20,max                        拿牌之前檢查內政點數夠不夠
 //                            確認當前玩家是誰,再確認當前玩家的內政點數,還要知道玩家想要拿的那張牌的價格
 //                        當前玩家的變量是[當前玩家]
 //                       當前玩家的內政點數可以透過方法[get當前玩家點數]                           
-                        if (cardNum < 5) {
-                            if (this.get當前玩家內政點數() > 0) {
+                        if (cardNum <= 4) {
+                            if (this.get當前玩家內政點數() >= 1) {
                                 System.out.println("該玩家具有點數準備允許該玩家拿牌(0~4)");
                                 do拿牌扣點(1);
                             } else {
-                                System.out.println("該玩家目前沒有點數.不允許拿牌");
+                                System.out.println("該玩家目前點數不足.不允許0~4拿牌");
                                 return false;
                             }
-
-//                            當前玩家
+                        } else if (cardNum <= 8) {
+                            if (this.get當前玩家內政點數() >= 2) {
+                                System.out.println("該玩家具有點數準備允許該玩家拿牌(0~8)");
+                                do拿牌扣點(2);
+                            } else {
+                                System.out.println("該玩家目前點數不足.不允許拿5~8牌");
+                                return false;
+                            }
+                        }else if (cardNum <= 12) {
+                            if (this.get當前玩家內政點數() >= 3) {
+                                System.out.println("該玩家具有點數準備允許該玩家拿牌(0~12)");
+                                do拿牌扣點(3);
+                            } else {
+                                System.out.println("該玩家目前點數不足.不允許9~12拿牌");
+                                return false;
+                            }
                         }
 //                        System.out.println("player" + player + " is going to 拿取 card#" + cardNum);
                         switch (當前玩家) {
