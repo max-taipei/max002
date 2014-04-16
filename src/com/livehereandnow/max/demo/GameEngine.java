@@ -7,6 +7,7 @@ package com.livehereandnow.max.demo;
 
 import com.livehereandnow.max.Card;
 import com.livehereandnow.max.CardType;
+import com.livehereandnow.max.Player;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,10 @@ import java.util.List;
  * @author chenp_000
  */
 public class GameEngine {
+//注意
+//class名稱一律大寫開頭
+//   變量一律小寫開頭,第二個英文字要大寫開頭,例如cardRow
+//    常量一律全大寫,例如NOCARD,並加上修飾詞final
 
     private List<Card> ageA內政牌;
     private List<Card> cardRow;
@@ -24,17 +29,67 @@ public class GameEngine {
     private List<Card> player2Cards;
     private List<Card> player3Cards;
     private List<Card> player4Cards;
-    Card NOCARD = new Card(999, "", 0, 999);
-    int player;
+    private Player p1;
+    private Player p2;
+    private Player p3;
+    private Player p4;
+
+    public Player getP1() {
+        return p1;
+    }
+
+    public Player getP2() {
+        return p2;
+    }
+
+    public Player getP3() {
+        return p3;
+    }
+
+    public Player getP4() {
+        return p4;
+    }
+
+    final Card NOCARD = new Card(999, "", 0, 999);
+//    int playerm
+//    2014-4-16 max 10:32,使用refactor變更變量名稱
+    int 當前玩家;
     int playerCnt = 2;
     int roundNum;
 
     public int getRoundNum() {
         return roundNum;
     }
+public void do拿牌扣點(int 點數){
+    if (當前玩家 == 1) {
+            p1.set內政點數(p1.get內政點數()-點數);
+        }
+        if (當前玩家 == 2) {
+            p2.set內政點數(p2.get內政點數()-點數);
+        }
+
+}
+    public int get當前玩家內政點數() {
+        if (當前玩家 == 1) {
+            return p1.get內政點數();
+        }
+        if (當前玩家 == 2) {
+            return p2.get內政點數();
+        }
+
+        if (當前玩家 == 3) {
+            return p3.get內政點數();
+        }
+
+        if (當前玩家 == 4) {
+            return p4.get內政點數();
+        }
+
+        return -1;//不應該發生
+    }
 
     public int getPlayer() {
-        return player;
+        return 當前玩家;
     }
 
     public List<Card> getAgeA內政牌() {
@@ -47,6 +102,8 @@ public class GameEngine {
 //        System.out.println("   ===========================");
 //        System.out.println("   Player Count: " + playerCnt);
         System.out.println("   === Round #" + roundNum + " ===");
+        System.out.println("   Player 1 內政點數=" + p1.get內政點數());
+        System.out.println("   Player 2 內政點數=" + p2.get內政點數());
         System.out.println("   Player 1 cards: " + getPlayerCardsString(player1Cards));
         System.out.println("   Player 2 cards: " + getPlayerCardsString(player2Cards));
         if (playerCnt >= 3) {
@@ -96,18 +153,21 @@ public class GameEngine {
 //            return;
 //        }
 
-        if (player == playerCnt) {
-            player = 1;
+        if (當前玩家 == playerCnt) {
+            當前玩家 = 1;
             roundNum++;
         } else {
-            player++;
+            當前玩家++;
         }
     }
 
     public GameEngine() {
-        player = 1;
+        p1 = new Player();
+        p2 = new Player();
+        當前玩家 = 1;
         roundNum = 1;
-
+        p1.set內政點數(1);
+        p2.set內政點數(2);
         ageA內政牌 = new ArrayList<>();
         cardRow = new ArrayList<>();
         player1Cards = new ArrayList<>();
@@ -198,6 +258,11 @@ public class GameEngine {
             }
             case "version": {
                 System.out.println();
+                System.out.println("  === ver 0.4 ===  2014-4-16, 11:00");
+                System.out.println("    1. do拿牌扣點 可以有效的扣除該玩家拿牌後的內政點數");
+                System.out.println("    2. 玩家內政點數沒有時無法拿取卡牌列0~4");
+                System.out.println();
+                
                 System.out.println("  === ver 0.3 ===  2014-4-16, 09:50");
                 System.out.println("    1. 拿牌限制在前13張,也就是take-card 0到12是有效值,不在這範圍的是無效指令");
                 System.out.println();
@@ -241,12 +306,27 @@ public class GameEngine {
                 if (cmd.startsWith("take-card")) {
                     if (tokens.size() == 2) {
                         int cardNum = Integer.parseInt(tokens.get(1));
-
+//2014-4-16 10:00,max,如果cardNum超過12回傳錯誤
                         if (cardNum > 12) {
                             return false;
                         }
+//2014-4-16 10:20,max                        拿牌之前檢查內政點數夠不夠
+//                            確認當前玩家是誰,再確認當前玩家的內政點數,還要知道玩家想要拿的那張牌的價格
+//                        當前玩家的變量是[當前玩家]
+//                       當前玩家的內政點數可以透過方法[get當前玩家點數]                           
+                        if (cardNum < 5) {
+                            if (this.get當前玩家內政點數() > 0) {
+                                System.out.println("該玩家具有點數準備允許該玩家拿牌(0~4)");
+                                do拿牌扣點(1);
+                            } else {
+                                System.out.println("該玩家目前沒有點數.不允許拿牌");
+                                return false;
+                            }
+
+//                            當前玩家
+                        }
 //                        System.out.println("player" + player + " is going to 拿取 card#" + cardNum);
-                        switch (player) {
+                        switch (當前玩家) {
                             case 1:
                                 player1Cards.add(cardRow.get(cardNum));
                                 break;
@@ -262,7 +342,7 @@ public class GameEngine {
                             default:
                                 return false;
                         }
-                        System.out.println("player" + player + " 拿取 [" + cardRow.get(cardNum).get卡名() + "]");
+                        System.out.println("player" + 當前玩家 + " 拿取 [" + cardRow.get(cardNum).get卡名() + "]");
 
                         cardRow.remove(cardNum);
 
