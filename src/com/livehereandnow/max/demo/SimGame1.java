@@ -25,9 +25,11 @@ public class SimGame1 {
             cmd = in.readLine();
             tokens = cmd.split(" ");
             System.out.println("sys >>>");
+            int cnt=0;
             for (String token : tokens) {
                 if (token.length()>0) {
-                    System.out.println("   >>>" + token);
+                    System.out.println(cnt +"   >>>" + token);
+                    cnt ++;
                 }
 
             }

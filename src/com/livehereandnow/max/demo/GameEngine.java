@@ -23,16 +23,32 @@ public class GameEngine {
 //   變量一律小寫開頭,第二個英文字要大寫開頭,例如cardRow
 //    常量一律全大寫,例如NOCARD,並加上修飾詞final
 
+    int[] CARD_POINT = {1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3};
     private List<Card> ageA內政牌;
     private List<Card> cardRow;
     private List<Card> player1Cards;
     private List<Card> player2Cards;
     private List<Card> player3Cards;
     private List<Card> player4Cards;
+
     private Player p1;
     private Player p2;
     private Player p3;
     private Player p4;
+
+//    boolean isPlayer1PossessedAgeALeader=false;
+//    boolean isPlayer2PossessedAgeALeader=false;
+//    boolean isPlayer3PossessedAgeALeader=false;
+//    boolean isPlayer4PossessedAgeALeader=false;
+    boolean[] playerPossessedAgeALeader = new boolean[5];// for Player 1 to Player 4
+
+    public boolean isPlayerPossessedAgeALeader(int k) {
+        return playerPossessedAgeALeader[k];
+    }
+
+    public void setPlayerPossessedAgeALeader(int k) {
+        this.playerPossessedAgeALeader[k] = true;
+    }
 
     public Player getP1() {
         return p1;
@@ -50,11 +66,11 @@ public class GameEngine {
         return p4;
     }
 
-    final Card NOCARD = new Card(999, "", 0, 999);
+    final Card NOCARD = new Card(999, "", 0, CardType.EMPTY);
 //    int playerm
 //    2014-4-16 max 10:32,使用refactor變更變量名稱
     int 當前玩家;
-    int playerCnt = 2;
+    int 玩家人數 = 4;
     int roundNum;
 
     public int getRoundNum() {
@@ -68,9 +84,16 @@ public class GameEngine {
         if (當前玩家 == 2) {
             p2.set內政點數(p2.get內政點數() - 點數);
         }
+        if (當前玩家 == 3) {
+            p3.set內政點數(p3.get內政點數() - 點數);
+        }
+        if (當前玩家 == 4) {
+            p4.set內政點數(p4.get內政點數() - 點數);
+        }
 
     }
-        public void set拿當前玩家拿過時代A領袖牌() {
+
+    public void set拿當前玩家拿過時代A領袖牌() {
         if (當前玩家 == 1) {
             p1.set拿過的時代A領袖牌數(1);
         }
@@ -98,8 +121,7 @@ public class GameEngine {
 
         return -1;//不應該發生
     }
-            
-            
+
     public int get當前玩家拿過的時代A領袖牌數() {
         if (當前玩家 == 1) {
             return p1.get拿過的時代A領袖牌數();
@@ -119,7 +141,7 @@ public class GameEngine {
         return -1;//不應該發生
     }
 
-    public int getPlayer() {
+    public int get當前玩家() {
         return 當前玩家;
     }
 
@@ -127,21 +149,17 @@ public class GameEngine {
         return ageA內政牌;
     }
 
-    public void showStatus() {
+    public void doStatus() {
         showCardRow();
-//        System.out.println("   === Players and Round ===");
-//        System.out.println("   ===========================");
-//        System.out.println("   Player Count: " + playerCnt);
+        System.out.println();
         System.out.println("   === Round #" + roundNum + " ===");
-        System.out.println("   Player 1 內政點數=" + p1.get內政點數());
-        System.out.println("   Player 2 內政點數=" + p2.get內政點數());
-        System.out.println("   Player 1 cards: " + getPlayerCardsString(player1Cards));
-        System.out.println("   Player 2 cards: " + getPlayerCardsString(player2Cards));
-        if (playerCnt >= 3) {
-            System.out.println("   Player 3 cards: " + getPlayerCardsString(player3Cards));
+        System.out.println("   Player 1 內政點數=" + p1.get內政點數() + getPlayerCardsString(player1Cards));
+        System.out.println("   Player 2 內政點數=" + p2.get內政點數() + getPlayerCardsString(player2Cards));
+        if (玩家人數 >= 3) {
+            System.out.println("   Player 3 內政點數=" + p3.get內政點數() + getPlayerCardsString(player3Cards));
         }
-        if (playerCnt == 4) {
-            System.out.println("   Player 4 cards: " + getPlayerCardsString(player4Cards));
+        if (玩家人數 == 4) {
+            System.out.println("   Player 4 內政點數=" + p4.get內政點數() + getPlayerCardsString(player4Cards));
         }
     }
 
@@ -150,17 +168,17 @@ public class GameEngine {
 
         System.out.print("   Value 1: ");
         for (int k = 0; k < 5; k++) {
-            System.out.print("[" + cardRow.get(k).get卡名() + "] ");
+            System.out.print(k + "[" + cardRow.get(k).get卡名() + "-" + cardRow.get(k).get類型Name() + "] ");
         }
         System.out.println();
         System.out.print("   Value 2: ");
         for (int k = 5; k < 9; k++) {
-            System.out.print("[" + cardRow.get(k).get卡名() + "] ");
+            System.out.print(k + "[" + cardRow.get(k).get卡名() + "-" + cardRow.get(k).get類型Name() + "] ");
         }
         System.out.println();
         System.out.print("   Value 3: ");
         for (int k = 9; k < 13; k++) {
-            System.out.print("[" + cardRow.get(k).get卡名() + "] ");
+            System.out.print(k + "[" + cardRow.get(k).get卡名() + "-" + cardRow.get(k).get類型Name() + "] ");
         }
         System.out.println();
 
@@ -168,37 +186,44 @@ public class GameEngine {
 
     public String getPlayerCardsString(List<Card> list) {
         StringBuilder sb = new StringBuilder();
+        sb.append(" ");
         for (int k = 0; k < list.size(); k++) {
-            sb.append("[").append(list.get(k).get卡名()).append("] ");
+//            sb.append("[").append(list.get(k).get卡名()).append("] ");
+            sb.append(list.get(k).get卡名and類型Name());
         }
         return sb.toString();
     }
 
-    public void changeTurn() {
-//        if (player == 1) {
-//            player = 2;
-//            return;
-//        }
-//        if (player == 2) {
-//            player = 1;
-//            return;
-//        }
+    public void doChangeTurn() {
 
-        if (當前玩家 == playerCnt) {
+        if (當前玩家 == 玩家人數) {
             當前玩家 = 1;
             roundNum++;
+            p1.set內政點數(4);
+            p2.set內政點數(4);
+            p3.set內政點數(4);
+            p4.set內政點數(4);
+
         } else {
             當前玩家++;
         }
+        System.out.println("change turn to player" + this.get當前玩家());
+
     }
 
     public GameEngine() {
         p1 = new Player();
         p2 = new Player();
+        p3 = new Player();
+        p4 = new Player();
+
         當前玩家 = 1;
         roundNum = 1;
         p1.set內政點數(1);
         p2.set內政點數(2);
+        p3.set內政點數(3);
+        p4.set內政點數(4);
+
         ageA內政牌 = new ArrayList<>();
         cardRow = new ArrayList<>();
         player1Cards = new ArrayList<>();
@@ -229,26 +254,178 @@ public class GameEngine {
         ageA內政牌.add(new Card(25, "革新思想", 0, CardType.黃牌, 774));
 
         //
-        System.out.println("system >>> init Age A 內政牌");
-        System.out.println("system >>> " + ageA內政牌);
-
+//        System.out.println("system >>> init Age A 內政牌");
+//        System.out.println("system >>> " + ageA內政牌);
         // shuffle cards
         Collections.shuffle(ageA內政牌);
-        System.out.println("system >>> shuffle Age A 內政牌");
-        System.out.println("system >>> " + ageA內政牌);
+//        System.out.println("system >>> shuffle Age A 內政牌");
+//        System.out.println("system >>> " + ageA內政牌);
 
         // only take first 13 cards and discard others
         for (int k = 0; k < 13; k++) {
             cardRow.add(ageA內政牌.get(k));
         }
-        System.out.println("system >>> Card Row");
-        System.out.println("system >>> " + cardRow);
+//        System.out.println("system >>> Card Row");
+//        System.out.println("system >>> " + cardRow);
 
-        this.showStatus();
+        System.out.println("   ========================");
+        System.out.println("   *    Welcome to XXX    *");
+        System.out.println("   ========================");
+
+        this.doStatus();
     }
 
     public List<Card> getCardRow() {
         return cardRow;
+    }
+
+    /**
+     * 1. take card
+     *
+     * (1)enough point to take card
+     *
+     * (2)not allow to take any card which is being taken within this round
+     *
+     * (3)not allow to take AgeA leader if you ever took it successfully
+     *
+     * 2. maintain points when take card successfully
+     *
+     * @param k
+     * @return true: perform take-card successfully
+     */
+    public boolean doTakeCard(int k) {
+        // System.out.println("DOING TAKE CARD ...");
+
+        Card card = cardRow.get(k);
+
+        // === preparation for take-card ===拿牌前的準備
+        //(1)enough point to take card點數要夠
+        int cardPoint = CARD_POINT[k];
+        if (get當前玩家內政點數() < cardPoint) {
+            System.out.println("Not enough point to take card. ***Nothing happened***");
+            return true;
+        }
+
+        //(2)not allow to take any card which is being taken within this round 不允許拿空牌
+        if (card.get卡名().length() == 0) {
+            System.out.println("This card has been taken! ***Nothing happened***");
+            return true;
+        }
+
+        //(3)not allow to take AgeA leader if you ever took it successfully 不允許拿兩張A時代領袖的牌
+        if (card.get時代() == 0 && card.get類型() == CardType.領袖) {
+            if (isPlayerPossessedAgeALeader(get當前玩家())) {
+                System.out.println("You are/were holing Age A leader before!***Nothing happened***");
+                return true;
+            }
+            setPlayerPossessedAgeALeader(get當前玩家());
+        }
+        //TODO(4)不允許拿兩張同名的科技牌
+        // === maintain take-card successfully ===
+        switch (當前玩家) {
+            case 1:
+                player1Cards.add(cardRow.get(k));
+                break;
+            case 2:
+                player2Cards.add(cardRow.get(k));
+                break;
+            case 3:
+                player3Cards.add(cardRow.get(k));
+                break;
+            case 4:
+                player4Cards.add(cardRow.get(k));
+                break;
+            default:
+                return false;
+        }
+        System.out.println("player" + 當前玩家 + " 拿取 [" + cardRow.get(k).get卡名() + "]");
+        do拿牌扣點(cardPoint);
+        cardRow.remove(k);//從卡牌列上移除該牌
+        cardRow.add(k, NOCARD);//並在卡牌列同一個位置增加空牌
+
+        return true;
+    }
+
+    public void doHelp() {
+        System.out.println("\n=== basic commands === (start)");
+        System.out.println("   help         this command");
+        System.out.println("   take-card X  take number X card, X is 0 base");
+        System.out.println("   change-turn  change player's turn");
+        System.out.println("   status       to show current game status");
+        System.out.println("   version      顯示版本變更歷史");
+        System.out.println("  TODO         代辦事項");
+        System.out.println("=== basic commands === (end)");
+    }
+
+    public void doVersion() {
+
+        System.out.println();
+        System.out.println("  === ver 0.9 ===  2014-4-16, 19:31, by MAX　");
+        System.out.println("    1. 修復3個玩家和4個玩家時的拿牌扣點");
+        System.out.println("    2. 新增簡易指令take");
+        System.out.println();
+        
+        System.out.println("  === ver 0.8 ===  2014-4-16, 18:40, by Mark");
+        System.out.println("    1. 2nd round forward, set points 4 to each player");
+        System.out.println();
+
+        System.out.println("  === ver 0.7 ===  2014-4-16, 18:00, by Mark");
+        System.out.println("    1. fix 禁止讓玩家拿兩張A時代領袖");
+        System.out.println("    2. enhance status layout, show card with typename");
+        System.out.println("    3. enhance 4 player on first round taking cards");
+        System.out.println();
+
+        System.out.println();
+        System.out.println("  === ver 0.6 ===  2014-4-16, 12:42");
+        System.out.println("    1. 禁止讓玩家拿兩張A時代領袖");
+        System.out.println();
+
+        System.out.println("  === ver 0.5.1 ===  2014-4-16, 11:49");
+        System.out.println("    1. 取消輸入英文變成小寫");
+        System.out.println("    2. 新增TODO指令,記錄應該要處理的待辦事項");
+        System.out.println();
+
+        System.out.println("  === ver 0.5 ===  2014-4-16, 11:27");
+        System.out.println("    1. 玩家再也無法拿空牌");
+        System.out.println("    2. 玩家可以有效的拿取卡牌列上的牌,並有效的支付點數");
+        System.out.println();
+
+        System.out.println("  === ver 0.4 ===  2014-4-16, 11:00");
+        System.out.println("    1. do拿牌扣點 可以有效的扣除該玩家拿牌後的內政點數");
+        System.out.println("    2. 玩家內政點數沒有時無法拿取卡牌列0~4");
+        System.out.println();
+
+        System.out.println("  === ver 0.3 ===  2014-4-16, 09:50");
+        System.out.println("    1. 拿牌限制在前13張,也就是take-card 0到12是有效值,不在這範圍的是無效指令");
+        System.out.println();
+
+        System.out.println("  === ver 0.2.2 ===  2014-4-16, 09:30");
+        System.out.println("    1. 增加中文說明");
+        System.out.println("    2. 增加version到help");
+        System.out.println();
+
+        System.out.println("  === ver 0.2.1 ===  2014-4-16, 08:30");
+        System.out.println("    1. hide player 1 is going to 拿取 card#0");
+        System.out.println("    2. show player 1 拿取 [凱薩]");
+        System.out.println("    3. improve help command增加幫助指令");
+        System.out.println();
+
+        System.out.println("  === ver 0.2 ===  2014-4-16, 08:00");
+        System.out.println("    1. allow palyers to take-card增加拿牌的指令,暫時沒有檢查有沒有足夠的內政點數");
+        System.out.println("    2. design NOCARD when card was taken from CardRow牌拿走之後,該格補上一張空白牌");
+        System.out.println("    3. show Player's on-hand cards顯示玩家們的手牌");
+        System.out.println();
+
+        System.out.println("  === ver 0.1 ===  2014-4-15, 18:00");
+        System.out.println("    1. allow 2 to 4 players to change-turn讓2~4的玩家可以做 換下一位");
+        System.out.println("    2. show CardRow with value 1,2 and 3展示卡牌列，並顯示各卡牌的價格");
+
+        System.out.println("  === 版本控制說明 ===");
+        System.out.println("    1. ver X.Y.Z");
+        System.out.println("    2. X最大版本,基本功能尚未完備前為0");
+        System.out.println("    3. Y中版本,任何和業務邏輯相關的新增移除功能,Y版本+1,只要Y的值增加,Z值歸0");
+        System.out.println("    4. Z最小版本,任何使用者介面的調整或增刪說明,與功能無關");
+
     }
 
     public boolean doCmd(String cmd) throws IOException {
@@ -269,15 +446,7 @@ public class GameEngine {
 
         switch (cleanCmd) {
             case "help": {
-                System.out.println("\n=== basic commands === (start)");
-                System.out.println("   help         this command");
-                System.out.println("   take-card X  take number X card, X is 0 base");
-                System.out.println("   change-turn  change player's turn");
-                System.out.println("   status       to show current game status");
-                System.out.println("   version      顯示版本變更歷史");
-                System.out.println("  TODO         代辦事項");
-                System.out.println("=== basic commands === (end)");
-
+                doHelp();
                 return true;
             }
             case "hint": {
@@ -286,11 +455,10 @@ public class GameEngine {
             }
 
             case "status": {
-//                System.out.println("to show game status");
-
-                showStatus();
+                doStatus();
                 return true;
             }
+
             case "TODO": {
                 System.out.println();
                 System.out.println("  === TODO ===  ");
@@ -298,65 +466,35 @@ public class GameEngine {
                 return true;
             }
             case "version": {
-                System.out.println();
-                System.out.println("  === ver 0.6 ===  2014-4-16, 12:42");
-                System.out.println("    1. 禁止讓玩家拿兩張A時代領袖");
-
-                
-                System.out.println("  === ver 0.5.1 ===  2014-4-16, 11:49");
-                System.out.println("    1. 取消輸入英文變成小寫");
-                System.out.println("    2. 新增TODO指令,記錄應該要處理的待辦事項");
-
-                System.out.println("  === ver 0.5 ===  2014-4-16, 11:27");
-                System.out.println("    1. 玩家再也無法拿空牌");
-                System.out.println("    2. 玩家可以有效的拿取卡牌列上的牌,並有效的支付點數");
-                System.out.println();
-
-                System.out.println("  === ver 0.4 ===  2014-4-16, 11:00");
-                System.out.println("    1. do拿牌扣點 可以有效的扣除該玩家拿牌後的內政點數");
-                System.out.println("    2. 玩家內政點數沒有時無法拿取卡牌列0~4");
-                System.out.println();
-
-                System.out.println("  === ver 0.3 ===  2014-4-16, 09:50");
-                System.out.println("    1. 拿牌限制在前13張,也就是take-card 0到12是有效值,不在這範圍的是無效指令");
-                System.out.println();
-
-                System.out.println("  === ver 0.2.2 ===  2014-4-16, 09:30");
-                System.out.println("    1. 增加中文說明");
-                System.out.println("    2. 增加version到help");
-                System.out.println();
-
-                System.out.println("  === ver 0.2.1 ===  2014-4-16, 08:30");
-                System.out.println("    1. hide player 1 is going to 拿取 card#0");
-                System.out.println("    2. show player 1 拿取 [凱薩]");
-                System.out.println("    3. improve help command增加幫助指令");
-                System.out.println();
-
-                System.out.println("  === ver 0.2 ===  2014-4-16, 08:00");
-                System.out.println("    1. allow palyers to take-card增加拿牌的指令,暫時沒有檢查有沒有足夠的內政點數");
-                System.out.println("    2. design NOCARD when card was taken from CardRow牌拿走之後,該格補上一張空白牌");
-                System.out.println("    3. show Player's on-hand cards顯示玩家們的手牌");
-                System.out.println();
-
-                System.out.println("  === ver 0.1 ===  2014-4-15, 18:00");
-                System.out.println("    1. allow 2 to 4 players to change-turn讓2~4的玩家可以做 換下一位");
-                System.out.println("    2. show CardRow with value 1,2 and 3展示卡牌列，並顯示各卡牌的價格");
-
-                System.out.println("  === 版本控制說明 ===");
-                System.out.println("    1. ver X.Y.Z");
-                System.out.println("    2. X最大版本,基本功能尚未完備前為0");
-                System.out.println("    3. Y中版本,任何和業務邏輯相關的新增移除功能,Y版本+1,只要Y的值增加,Z值歸0");
-                System.out.println("    4. Z最小版本,任何使用者介面的調整或增刪說明,與功能無關");
+                doVersion();
                 return true;
             }
             case "change-turn": {
-                this.changeTurn();
-                System.out.println("change turn to player" + this.getPlayer());
-
+                doChangeTurn();
                 return true;
             }
 
             default:
+
+                if (tokens.get(0).equalsIgnoreCase("take-card")||tokens.get(0).equalsIgnoreCase("take")) {//簡易指令take
+                    if (tokens.size() != 2) { // take-card X, X is a must 目前只支持一次拿一張卡
+                        return false;
+                    }
+                    int cardNum = Integer.parseInt(tokens.get(1));//將第二個字符串轉為整數,第二個的序號為1
+                    if (cardNum > 12 || cardNum < 0) { // card number must be 0 to 12 only 
+//                        System.out.println("card number must be 0 to 12 only *** Nothing happened ***");
+                        System.out.println("拿的牌號必須要在0~12之內 *** 什麼事情都沒發生 ***");
+                        return true;
+                    }
+                    if (cardRow.get(cardNum).get編號() == 999) {
+//                        System.out.println("不讓玩家拿空牌 *** Nothing happened ***");
+                        System.out.println("不讓玩家拿空牌 *** 什麼事情都沒發生 ***");
+                        
+                        return true;
+                    }
+                    return doTakeCard(cardNum);
+                }
+
                 if (cmd.startsWith("take-card")) {
                     if (tokens.size() == 2) {
                         int cardNum = Integer.parseInt(tokens.get(1));
@@ -375,22 +513,22 @@ public class GameEngine {
                         }
                         //2014-4-16 11:54,max,目前的cardNum必然介於0~12之間而且不會是空牌
 //                        當該玩家拿過一張時代A領袖牌時,就不能再拿取
-                        if (this.get當前玩家拿過的時代A領袖牌數()==1) {
-                            
+                        if (this.get當前玩家拿過的時代A領袖牌數() == 1) {
+
                             System.out.println("這個玩家已經拿過一張時代A領袖牌,如果他還想拿時代A的領袖牌予以制止");
 //                            return false;
                         }
 
-                        if(cardRow.get(cardNum).get類型()==CardType.領袖){
-                                     System.out.println("這張是領袖牌");
-                                     
-                                     if(this.get當前玩家拿過的時代A領袖牌數()!=1){
-                                         set拿當前玩家拿過時代A領袖牌();
-                                     }else
-                                         return false;
-                                     
-                                     
-                                 }
+                        if (cardRow.get(cardNum).get類型() == CardType.領袖) {
+                            System.out.println("這張是領袖牌");
+
+                            if (this.get當前玩家拿過的時代A領袖牌數() != 1) {
+                                set拿當前玩家拿過時代A領袖牌();
+                            } else {
+                                return false;
+                            }
+
+                        }
 //2014-4-16 10:20,max                        拿牌之前檢查內政點數夠不夠
 //                            確認當前玩家是誰,再確認當前玩家的內政點數,還要知道玩家想要拿的那張牌的價格
 //                        當前玩家的變量是[當前玩家]
@@ -400,15 +538,14 @@ public class GameEngine {
                                 System.out.println("該玩家具有點數準備允許該玩家拿牌(0~4)");
                                 do拿牌扣點(1);
                                 System.out.println("該玩家拿的牌是不是領袖牌?");
-                                 System.out.println("player" + 當前玩家 + " 拿取 [" + cardRow.get(cardNum).get卡名() + "]");
-                                 System.out.println("player" + 當前玩家 + " 拿取 [" + cardRow.get(cardNum).get類型() + "]");
+                                System.out.println("player" + 當前玩家 + " 拿取 [" + cardRow.get(cardNum).get卡名() + "]");
+                                System.out.println("player" + 當前玩家 + " 拿取 [" + cardRow.get(cardNum).get類型() + "]");
 //                                 if(cardRow.get(cardNum).get類型()==CardType.領袖){
 //                                     System.out.println("這張是領袖牌");
 //                                     
 //                                 }
 //                                 
-                                
-                                
+
                             } else {
                                 System.out.println("該玩家目前點數不足.不允許0~4拿牌");
                                 return false;
